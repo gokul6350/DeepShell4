@@ -102,4 +102,13 @@ scrollbar slider:hover {
 .terminal-widget {
     padding: 8px;
     background: transparent;
+}
+
+vte-terminal {
+    background: transparent;
+    background-color: transparent;
+}
+
+.terminal-panel {
+    background: transparent;
 } 
