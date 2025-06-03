@@ -1,0 +1,105 @@
+.deep-shell-window {
+    background: rgba(26, 27, 30, 0.95);  /* 95% opacity */
+}
+
+.header-button {
+    margin: 2px;
+    padding: 4px;
+    border-radius: 6px;
+    background: rgba(44, 46, 51, 0.95);
+    border: none;
+    color: #e4e4e4;
+}
+
+.header-button:hover {
+    background: rgba(60, 62, 67, 0.95);
+}
+
+.messages-scroll {
+    background: transparent;
+}
+
+.messages-container {
+    background: transparent;
+}
+
+.message {
+    border-radius: 12px;
+    margin: 4px;
+    background: rgba(44, 46, 51, 0.95);
+    color: #e4e4e4;
+    padding: 4px;
+    /* GTK doesn't support max-width directly, we'll handle this in the Python code */
+}
+
+.message.assistant {
+    background: rgba(44, 46, 51, 0.95);
+    border-bottom-left-radius: 4px;
+    /* margin-right: auto; - Not supported in GTK CSS */
+}
+
+.message.user {
+    background: rgba(60, 62, 67, 0.95);
+    border-bottom-right-radius: 4px;
+    /* margin-left: auto; - Not supported in GTK CSS */
+    color: #ffffff;
+}
+
+.input-container {
+    background: rgba(26, 27, 30, 0.98);
+    border-top: 1px solid rgba(44, 46, 51, 0.95);
+    padding: 8px;
+}
+
+.message-input {
+    background: rgba(44, 46, 51, 0.95);
+    border: 1px solid rgba(60, 62, 67, 0.95);
+    border-radius: 8px;
+    color: white;
+    padding: 8px 12px;
+    margin: 4px;
+}
+
+.message-input:focus {
+    border-color: rgba(76, 78, 83, 0.95);
+    /* box-shadow not supported in GTK CSS */
+}
+
+.send-button {
+    background: rgba(44, 46, 51, 0.95);
+    border: none;
+    border-radius: 8px;
+    padding: 8px;
+    margin: 4px;
+}
+
+.send-button:hover {
+    background: rgba(60, 62, 67, 0.95);
+}
+
+scrollbar {
+    background: transparent;
+    border-radius: 8px;
+}
+
+scrollbar slider {
+    min-width: 6px;
+    min-height: 6px;
+    border-radius: 3px;
+    background: rgba(44, 46, 51, 0.95);
+}
+
+scrollbar slider:hover {
+    background: rgba(60, 62, 67, 0.95);
+}
+
+.panel-separator {
+    background: rgba(44, 46, 51, 0.95);
+    margin: 0;
+    padding: 1px;
+}
+
+.terminal-widget {
+    padding: 8px;
+    background: transparent;
+} 
