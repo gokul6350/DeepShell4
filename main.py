@@ -68,7 +68,7 @@ class SettingsDialog(Gtk.Dialog):
 
 class DeepShellWindow(Gtk.Window):
     def __init__(self):
-        super().__init__(title="Deep Shell")
+        super().__init__(title="DeepShell AI - Your Terminal Copilot")
         
         # Initialize chat history
         self.chat_history = []
@@ -95,7 +95,128 @@ class DeepShellWindow(Gtk.Window):
         
         # Set up CSS provider
         css_provider = Gtk.CssProvider()
-        css_provider.load_from_path("style.css")
+        css_data = """
+        .deep-shell-window {
+            background-color: rgba(26, 27, 30, 0.95);
+            color: white;
+        }
+        
+        .header-box {
+            background-color: rgba(30, 30, 30, 0.95);
+            padding: 12px 16px;
+            border-bottom: 1px solid rgba(44, 46, 51, 0.95);
+        }
+        
+        .title-label {
+            color: white;
+            font-size: 18px;
+            font-weight: bold;
+        }
+        
+        .control-panel {
+            background-color: rgba(30, 30, 30, 0.95);
+            padding: 8px 16px;
+            border-bottom: 1px solid rgba(44, 46, 51, 0.95);
+        }
+        
+        .control-button {
+            background-color: rgba(51, 51, 51, 0.95);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            padding: 6px 12px;
+            margin: 0 4px;
+        }
+        
+        .control-button:hover {
+            background-color: rgba(76, 78, 83, 0.95);
+        }
+        
+        .messages-scroll {
+            background-color: rgba(26, 27, 30, 0.95);
+        }
+        
+        .message {
+            margin: 8px 16px;
+            padding: 12px 16px;
+            border-radius: 12px;
+            color: white;
+        }
+        
+        .message.user {
+            background-color: rgba(49, 49, 49, 0.95);
+            margin-left: 64px;
+        }
+        
+        .message.assistant {
+            background-color: rgba(35, 35, 35, 0.95);
+            margin-right: 64px;
+        }
+        
+        .input-container {
+            background-color: rgba(26, 27, 30, 0.95);
+            border-top: 1px solid rgba(44, 46, 51, 0.95);
+        }
+        
+        .message-input {
+            background-color: rgba(51, 51, 51, 0.95);
+            color: white;
+            border: 1px solid rgba(76, 78, 83, 0.95);
+            border-radius: 20px;
+            padding: 8px 12px;
+            margin: 8px;
+        }
+        
+        .message-input:focus {
+            background-color: rgba(64, 64, 64, 0.95);
+            border-color: rgba(100, 100, 100, 0.95);
+        }
+        
+        .send-button {
+            background-color: rgba(43, 87, 151, 0.95);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            padding: 8px;
+            margin-left: 8px;
+        }
+        
+        .send-button:hover {
+            background-color: rgba(60, 100, 170, 0.95);
+        }
+        
+        .command-block {
+            background-color: rgba(0, 0, 0, 0.4);
+            border-left: 3px solid rgba(43, 87, 151, 0.95);
+            border-radius: 4px;
+            padding: 8px 12px;
+            margin: 4px 0;
+            font-family: monospace;
+        }
+        
+        .run-button {
+            background-color: rgba(43, 87, 151, 0.95);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            padding: 4px;
+            min-width: 24px;
+            min-height: 24px;
+        }
+        
+        .run-button:hover {
+            background-color: rgba(60, 100, 170, 0.95);
+        }
+        
+        .terminal-panel {
+            background-color: rgba(30, 30, 30, 0.95);
+        }
+        
+        .chat-panel {
+            background-color: rgba(30, 30, 30, 0.95);
+        }
+        """
+        css_provider.load_from_data(css_data.encode())
         Gtk.StyleContext.add_provider_for_screen(
             screen,
             css_provider,
@@ -111,37 +232,30 @@ class DeepShellWindow(Gtk.Window):
         self.chat_panel.get_style_context().add_class("chat-panel")
         self.main_paned.add1(self.chat_panel)
         
-        # Header bar (simplified)
-        self.header = Gtk.HeaderBar()
-        self.header.set_show_close_button(True)
-        self.header.props.title = "Deep Shell"
-        self.set_titlebar(self.header)
+        # Header bar with title, controls, and settings
+        header = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=8)
+        header.get_style_context().add_class("header-box")
         
-        # Logo in header
-        logo_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=8)
+        # Left side: Logo and title
+        left_header = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=8)
         logo_image = Gtk.Image.new_from_icon_name("utilities-terminal", Gtk.IconSize.LARGE_TOOLBAR)
-        logo_box.pack_start(logo_image, False, False, 0)
-        self.header.pack_start(logo_box)
+        title_label = Gtk.Label(label="DeepShell AI")
+        title_label.get_style_context().add_class("title-label")
         
-        # Control panel at the top of chat panel
-        control_panel = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=8)
-        control_panel.set_margin_start(16)
-        control_panel.set_margin_end(16)
-        control_panel.set_margin_top(8)
-        control_panel.set_margin_bottom(8)
-        control_panel.get_style_context().add_class("control-panel")
+        left_header.pack_start(logo_image, False, False, 0)
+        left_header.pack_start(title_label, False, False, 0)
         
-        # Auto Run switch with label
-        auto_run_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=4)
+        # Center: Auto Run control
+        center_header = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=8)
         auto_run_label = Gtk.Label(label="Auto Run")
-        auto_run_label.get_style_context().add_class("control-label")
-        
-        # Custom switch using checkbox
+        auto_run_label.set_markup("<span color='white'>Auto Run</span>")
         self.auto_run_switch = Gtk.CheckButton()
-        self.auto_run_switch.get_style_context().add_class("custom-switch")
         
-        auto_run_box.pack_start(auto_run_label, False, False, 0)
-        auto_run_box.pack_start(self.auto_run_switch, False, False, 0)
+        center_header.pack_start(auto_run_label, False, False, 0)
+        center_header.pack_start(self.auto_run_switch, False, False, 0)
+        
+        # Right side: Settings and Reset buttons
+        right_header = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=8)
         
         # Reset button
         reset_button = Gtk.Button()
@@ -154,21 +268,23 @@ class DeepShellWindow(Gtk.Window):
         settings_button = Gtk.Button()
         settings_icon = Gtk.Image.new_from_icon_name("preferences-system", Gtk.IconSize.BUTTON)
         settings_button.add(settings_icon)
-        settings_button.set_tooltip_text("Settings")
         settings_button.get_style_context().add_class("control-button")
         settings_button.connect("clicked", self.on_settings_clicked)
         
-        # Pack controls in the control panel
-        control_panel.pack_start(auto_run_box, False, False, 0)
-        control_panel.pack_end(settings_button, False, False, 0)
-        control_panel.pack_end(reset_button, False, False, 0)
+        right_header.pack_end(settings_button, False, False, 0)
+        right_header.pack_end(reset_button, False, False, 0)
         
-        # Add control panel to chat panel
-        self.chat_panel.pack_start(control_panel, False, False, 0)
+        # Pack all sections into header
+        header.pack_start(left_header, False, False, 0)
+        header.set_center_widget(center_header)
+        header.pack_end(right_header, False, False, 0)
+        
+        self.chat_panel.pack_start(header, False, False, 0)
         
         # Messages ScrolledWindow
         scrolled = Gtk.ScrolledWindow()
         scrolled.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC)
+        scrolled.get_style_context().add_class("messages-scroll")
         self.chat_panel.pack_start(scrolled, True, True, 0)
         
         # Messages container
@@ -184,16 +300,17 @@ class DeepShellWindow(Gtk.Window):
         
         # Input area
         input_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=8)
-        input_box.set_margin_start(16)
-        input_box.set_margin_end(16)
-        input_box.set_margin_top(8)
-        input_box.set_margin_bottom(16)
-        self.chat_panel.pack_end(input_box, False, False, 0)
+        input_box.set_margin_start(8)
+        input_box.set_margin_end(8)
+        input_box.set_margin_top(0)
+        input_box.set_margin_bottom(0)
+        input_box.get_style_context().add_class("input-container")
         
         # Text input
         self.entry = Gtk.Entry()
         self.entry.set_placeholder_text("Ask me anything about the terminal...")
         self.entry.connect("activate", self.on_entry_activate)
+        self.entry.get_style_context().add_class("message-input")
         input_box.pack_start(self.entry, True, True, 0)
         
         # Send button
@@ -204,8 +321,11 @@ class DeepShellWindow(Gtk.Window):
         send_button.get_style_context().add_class("send-button")
         input_box.pack_end(send_button, False, False, 0)
         
+        self.chat_panel.pack_end(input_box, False, False, 0)
+        
         # Right panel for terminal
         self.terminal_panel = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
+        self.terminal_panel.get_style_context().add_class("terminal-panel")
         self.main_paned.add2(self.terminal_panel)
         
         # Create terminal
@@ -213,23 +333,17 @@ class DeepShellWindow(Gtk.Window):
         self.terminal.set_cursor_blink_mode(Vte.CursorBlinkMode.ON)
         self.terminal.set_cursor_shape(Vte.CursorShape.IBEAM)
         
-        # Set terminal opacity
+        # Set terminal colors
         background_color = Gdk.RGBA()
-        background_color.parse('rgba(30,30,30,0.9)')
+        background_color.parse('rgba(30,30,30,0.95)')
         foreground_color = Gdk.RGBA()
         foreground_color.parse('rgba(230,230,230,1.0)')
         
         self.terminal.set_color_background(background_color)
         self.terminal.set_color_foreground(foreground_color)
         
-        # Disable transparency
-        self.terminal.set_clear_background(True)
-        
         # Set terminal font
         self.terminal.set_font(Pango.FontDescription("MonoSpace 10"))
-        
-        # Add CSS class to terminal
-        self.terminal.get_style_context().add_class("vte-terminal")
         
         # Start shell in terminal
         self.terminal.spawn_sync(
@@ -246,15 +360,7 @@ class DeepShellWindow(Gtk.Window):
         self.terminal_panel.pack_start(self.terminal, True, True, 0)
         
         # Set initial position of the pane divider
-        self.main_paned.set_position(600) # Initial position for the divider
-        
-        # Set up styles
-        self.get_style_context().add_class("deep-shell-window")
-        scrolled.get_style_context().add_class("messages-scroll")
-        self.messages_box.get_style_context().add_class("messages-container")
-        input_box.get_style_context().add_class("input-container")
-        self.entry.get_style_context().add_class("message-input")
-        self.terminal.get_style_context().add_class("terminal-widget")
+        self.main_paned.set_position(600)
         
     def load_settings(self):
         try:
