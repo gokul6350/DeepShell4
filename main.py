@@ -215,7 +215,7 @@ class DeepShellWindow(Gtk.Window):
         
         # Set terminal opacity
         background_color = Gdk.RGBA()
-        background_color.parse('rgba(22,22,22,0.95)')
+        background_color.parse('rgba(30,30,30,0.9)')
         foreground_color = Gdk.RGBA()
         foreground_color.parse('rgba(230,230,230,1.0)')
         
@@ -325,27 +325,33 @@ class DeepShellWindow(Gtk.Window):
         button.connect("clicked", lambda btn: self.execute_command(command))
         return button
 
-    def format_message_with_commands(self, text):
-        """Format message text and extract commands, returning both the formatted text and command buttons"""
-        commands = self.extract_commands(text)
-        formatted_text = text
-        buttons = []
+    def format_message_for_display(self, text_with_commands):
+        """
+        Processes text containing ```run...``` blocks for display.
+        Returns:
+            - processed_text: Text with ```run...``` blocks replaced by placeholders.
+            - command_details: A list of dicts, each with {"placeholder": str, "command_str": str}.
+        """
+        command_details = []
         
-        if commands:
-            # Replace ```run blocks with formatted command display
-            for cmd in commands:
-                formatted_text = formatted_text.replace(
-                    f"```run\n{cmd}```",
-                    f"Command: {cmd}"
-                )
-                if not self.auto_run_switch.get_active():
-                    buttons.append(self.create_run_button(cmd))
-                else:
-                    self.execute_command(cmd)
-        
-        return formatted_text, buttons
+        def replacer_func(match_obj):
+            command_str = match_obj.group(1).strip()
+            placeholder_index = len(command_details) 
+            placeholder = f"__CMD_PLACEHOLDER_{placeholder_index}__"
+            
+            command_details.append({
+                "placeholder": placeholder,
+                "command_str": command_str
+            })
+            return placeholder
 
-    def add_message(self, text, message_type):
+        pattern = r"```run\n(.*?)```"
+        
+        processed_text = re.sub(pattern, replacer_func, text_with_commands, flags=re.DOTALL)
+        
+        return processed_text, command_details
+
+    def add_message(self, text_content, message_type):
         # Create a container for alignment
         align = Gtk.Alignment()
         if message_type == "user":
@@ -359,31 +365,68 @@ class DeepShellWindow(Gtk.Window):
         message_box.get_style_context().add_class(message_type)
         
         if message_type == "assistant":
-            # Format message and get command buttons
-            formatted_text, buttons = self.format_message_with_commands(text)
+            # text_content is the original LLM response.
+            # Auto-run has been handled by the caller (on_entry_activate).
             
-            # Create message content box (horizontal)
-            content_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=8)
-            content_box.set_margin_start(12)
-            content_box.set_margin_end(12)
-            content_box.set_margin_top(8)
-            content_box.set_margin_bottom(8)
+            processed_text_for_display, command_details = self.format_message_for_display(text_content)
             
-            # Add label
-            label = Gtk.Label(label=formatted_text)
-            label.set_line_wrap(True)
-            label.set_line_wrap_mode(Pango.WrapMode.WORD_CHAR)
-            label.set_xalign(0)
-            content_box.pack_start(label, True, True, 0)
+            # This container will hold all parts of the message (text labels, command blocks)
+            message_content_container = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=4)
+            message_content_container.set_margin_start(12)
+            message_content_container.set_margin_end(12)
+            message_content_container.set_margin_top(8)
+            message_content_container.set_margin_bottom(8)
+
+            if not command_details:
+                # No commands, just display the text as is (it might have Pango markup from LLM)
+                label = Gtk.Label()
+                label.set_markup(processed_text_for_display) # processed_text_for_display is original text
+                label.set_line_wrap(True)
+                label.set_line_wrap_mode(Pango.WrapMode.WORD_CHAR)
+                label.set_xalign(0)
+                message_content_container.pack_start(label, False, False, 0)
+            else:
+                # There are commands, so split the text by placeholders
+                placeholders_pattern = "|".join([re.escape(cd["placeholder"]) for cd in command_details])
+                # The pattern includes capturing parentheses to keep delimiters
+                text_parts = re.split(f"({placeholders_pattern})", processed_text_for_display)
+
+                # Helper to map placeholders back to their command strings
+                placeholder_to_cmd_map = {cd["placeholder"]: cd["command_str"] for cd in command_details}
+
+                for part in filter(None, text_parts): # filter(None,...) removes empty strings if any
+                    if part in placeholder_to_cmd_map:
+                        # This part is a placeholder, so render a command block
+                        cmd_str = placeholder_to_cmd_map[part]
+                        
+                        cmd_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=6)
+                        cmd_box.get_style_context().add_class("command-block") # Apply CSS
+
+                        cmd_label = Gtk.Label()
+                        # Format command with a '$' prefix and monospace font using Pango
+                        cmd_label.set_markup(f'<span font_family="monospace" weight="bold">$ {cmd_str}</span>')
+                        cmd_label.set_xalign(0)
+                        cmd_box.pack_start(cmd_label, True, True, 0)
+
+                        if not self.auto_run_switch.get_active():
+                            # Add run button only if auto-run is off
+                            button_widget = self.create_run_button(cmd_str)
+                            cmd_box.pack_end(button_widget, False, False, 0)
+                        
+                        message_content_container.pack_start(cmd_box, False, False, 0)
+                    else:
+                        # This part is regular text
+                        if part.strip(): # Avoid adding empty labels
+                            label = Gtk.Label()
+                            label.set_markup(part) # Use set_markup for any Pango in text segments
+                            label.set_line_wrap(True)
+                            label.set_line_wrap_mode(Pango.WrapMode.WORD_CHAR)
+                            label.set_xalign(0)
+                            message_content_container.pack_start(label, False, False, 0)
             
-            # Add run buttons if any
-            for button in buttons:
-                content_box.pack_end(button, False, False, 0)
-            
-            message_box.add(content_box)
-        else:
-            # Regular user message
-            label = Gtk.Label(label=text)
+            message_box.add(message_content_container)
+        else: # User message
+            label = Gtk.Label(label=text_content)
             label.set_line_wrap(True)
             label.set_line_wrap_mode(Pango.WrapMode.WORD_CHAR)
             label.set_xalign(0)
@@ -407,21 +450,46 @@ class DeepShellWindow(Gtk.Window):
         self.add_message(text, "user")
     
     def add_assistant_message(self, text):
+        # This is now just a wrapper, auto-run is handled by the caller
         self.add_message(text, "assistant")
     
     def on_entry_activate(self, widget):
         text = self.entry.get_text().strip()
-        if text:
-            self.add_user_message(text)
-            self.entry.set_text("")
+        if not text:
+            return # Do nothing if input is empty
             
-            # Create async task for AI response
-            async def get_response():
-                response = await self.get_ai_response(text)
-                GLib.idle_add(self.add_assistant_message, response)
+        self.add_user_message(text)
+        self.entry.set_text("")
+        
+        # Create async task for AI response and processing
+        async def get_response_and_process():
+            try:
+                llm_response_text = await self.get_ai_response(text) # Original LLM response
+
+                # This function will be called by GLib.idle_add, so it runs in the main GTK thread
+                def do_gui_update_after_ai():
+                    # Handle auto-run based on the original LLM response
+                    if self.auto_run_switch.get_active():
+                        commands_in_response = self.extract_commands(llm_response_text)
+                        for cmd_to_run in commands_in_response:
+                            self.execute_command(cmd_to_run)
+                    
+                    # Add assistant message to UI (it will be formatted for display by add_message)
+                    self.add_assistant_message(llm_response_text)
+                
+                GLib.idle_add(do_gui_update_after_ai)
             
-            # Run async task
-            asyncio.run(get_response())
+            except Exception as e:
+                # Handle/display error if get_ai_response fails
+                error_message = f"Error processing AI request: {str(e)}"
+                GLib.idle_add(self.add_assistant_message, error_message)
+        
+        # Run the async task.
+        # For Gtk, it's often better to run asyncio tasks in a way that integrates with GLib's main loop
+        # or in a separate thread to avoid blocking. asyncio.run() can block.
+        # However, if this was working before, we'll keep it for now to focus on display.
+        # A more robust Gtk+asyncio integration might be needed for complex apps.
+        asyncio.run(get_response_and_process())
 
 def main():
     win = DeepShellWindow()

@@ -3,7 +3,7 @@
 }
 
 .control-panel {
-    background-color: rgba(22, 22, 22, 0.95);
+    background-color: rgba(30, 30, 30, 0.95);
     border-radius: 8px;
     padding: 8px;
 }
@@ -78,7 +78,7 @@ separator {
 }
 
 .message.user {
-    background-color: #2b5797;
+    background-color: #313131;
     color: white;
 }
 
@@ -200,15 +200,28 @@ dialog button:hover {
     color: white;
     border-radius: 50%;
     padding: 4px;
-    min-width: 24px;
-    min-height: 24px;
+    min-width: 28px;
+    min-height: 28px;
     margin-left: 8px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
 }
 
 .run-button:hover {
     background-color: #3b67a7;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
 }
 
 .run-button image {
     color: white;
+    padding: 0;
+    margin: 0;
+}
+
+.command-block {
+    background-color: rgba(0, 0, 0, 0.2);
+    border-radius: 4px;
+    padding: 8px 12px;
+    margin: 4px 0;
+    font-family: monospace;
+    border-left: 3px solid #2b5797;
 } 
