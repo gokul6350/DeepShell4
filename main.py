@@ -100,15 +100,14 @@ class DeepShellWindow(Gtk.Window):
             Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION
         )
         
-        # Main horizontal container
-        self.main_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL)
-        self.add(self.main_box)
+        # Main paned container for resizable panels
+        self.main_paned = Gtk.Paned(orientation=Gtk.Orientation.HORIZONTAL)
+        self.add(self.main_paned)
         
         # Left panel for chat interface
         self.chat_panel = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
-        self.chat_panel.set_size_request(600, -1)  # Set minimum width for chat panel
         self.chat_panel.get_style_context().add_class("chat-panel")
-        self.main_box.pack_start(self.chat_panel, True, True, 0)
+        self.main_paned.add1(self.chat_panel)
         
         # Header bar (simplified)
         self.header = Gtk.HeaderBar()
@@ -203,15 +202,9 @@ class DeepShellWindow(Gtk.Window):
         send_button.get_style_context().add_class("send-button")
         input_box.pack_end(send_button, False, False, 0)
         
-        # Separator between chat and terminal
-        separator = Gtk.Separator(orientation=Gtk.Orientation.VERTICAL)
-        separator.get_style_context().add_class("panel-separator")
-        self.main_box.pack_start(separator, False, False, 0)
-        
         # Right panel for terminal
         self.terminal_panel = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
-        self.terminal_panel.set_size_request(600, -1)  # Set minimum width for terminal panel
-        self.main_box.pack_start(self.terminal_panel, True, True, 0)
+        self.main_paned.add2(self.terminal_panel)
         
         # Create terminal
         self.terminal = Vte.Terminal()
@@ -249,6 +242,9 @@ class DeepShellWindow(Gtk.Window):
         
         # Add terminal to panel
         self.terminal_panel.pack_start(self.terminal, True, True, 0)
+        
+        # Set initial position of the pane divider
+        self.main_paned.set_position(600) # Initial position for the divider
         
         # Set up styles
         self.get_style_context().add_class("deep-shell-window")
