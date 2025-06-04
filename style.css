@@ -193,4 +193,22 @@ dialog button {
 
 dialog button:hover {
     background-color: #3b67a7;
+}
+
+.run-button {
+    background-color: #2b5797;
+    color: white;
+    border-radius: 50%;
+    padding: 4px;
+    min-width: 24px;
+    min-height: 24px;
+    margin-left: 8px;
+}
+
+.run-button:hover {
+    background-color: #3b67a7;
+}
+
+.run-button image {
+    color: white;
 } 

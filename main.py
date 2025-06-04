@@ -7,6 +7,8 @@ import os
 import asyncio
 from LLMHandler import deepshellai, LLMHandler
 import json
+import re
+
 
 class SettingsDialog(Gtk.Dialog):
     def __init__(self, parent, current_settings):
@@ -135,11 +137,11 @@ class DeepShellWindow(Gtk.Window):
         auto_run_label.get_style_context().add_class("control-label")
         
         # Custom switch using checkbox
-        auto_run_switch = Gtk.CheckButton()
-        auto_run_switch.get_style_context().add_class("custom-switch")
+        self.auto_run_switch = Gtk.CheckButton()
+        self.auto_run_switch.get_style_context().add_class("custom-switch")
         
         auto_run_box.pack_start(auto_run_label, False, False, 0)
-        auto_run_box.pack_start(auto_run_switch, False, False, 0)
+        auto_run_box.pack_start(self.auto_run_switch, False, False, 0)
         
         # Reset button
         reset_button = Gtk.Button()
@@ -302,6 +304,47 @@ class DeepShellWindow(Gtk.Window):
         except Exception as e:
             return f"Error: {str(e)}"
     
+    def extract_commands(self, text):
+        """Extract commands from text that are wrapped in ```run blocks"""
+        pattern = r"```run\n(.*?)```"
+        commands = re.findall(pattern, text, re.DOTALL)
+        return [cmd.strip() for cmd in commands]
+
+    def execute_command(self, command):
+        """Execute a command in the terminal"""
+        command_bytes = (command + "\n").encode('utf-8')
+        self.terminal.feed_child(command_bytes)
+
+    def create_run_button(self, command):
+        """Create a run button for a command"""
+        button = Gtk.Button()
+        button.set_tooltip_text("Run command")
+        icon = Gtk.Image.new_from_icon_name("media-playback-start", Gtk.IconSize.SMALL_TOOLBAR)
+        button.add(icon)
+        button.get_style_context().add_class("run-button")
+        button.connect("clicked", lambda btn: self.execute_command(command))
+        return button
+
+    def format_message_with_commands(self, text):
+        """Format message text and extract commands, returning both the formatted text and command buttons"""
+        commands = self.extract_commands(text)
+        formatted_text = text
+        buttons = []
+        
+        if commands:
+            # Replace ```run blocks with formatted command display
+            for cmd in commands:
+                formatted_text = formatted_text.replace(
+                    f"```run\n{cmd}```",
+                    f"Command: {cmd}"
+                )
+                if not self.auto_run_switch.get_active():
+                    buttons.append(self.create_run_button(cmd))
+                else:
+                    self.execute_command(cmd)
+        
+        return formatted_text, buttons
+
     def add_message(self, text, message_type):
         # Create a container for alignment
         align = Gtk.Alignment()
@@ -315,17 +358,41 @@ class DeepShellWindow(Gtk.Window):
         message_box.get_style_context().add_class("message")
         message_box.get_style_context().add_class(message_type)
         
-        # Label
-        label = Gtk.Label(label=text)
-        label.set_line_wrap(True)
-        label.set_line_wrap_mode(Pango.WrapMode.WORD_CHAR)
-        label.set_xalign(0)
-        label.set_margin_start(12)
-        label.set_margin_end(12)
-        label.set_margin_top(8)
-        label.set_margin_bottom(8)
+        if message_type == "assistant":
+            # Format message and get command buttons
+            formatted_text, buttons = self.format_message_with_commands(text)
+            
+            # Create message content box (horizontal)
+            content_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=8)
+            content_box.set_margin_start(12)
+            content_box.set_margin_end(12)
+            content_box.set_margin_top(8)
+            content_box.set_margin_bottom(8)
+            
+            # Add label
+            label = Gtk.Label(label=formatted_text)
+            label.set_line_wrap(True)
+            label.set_line_wrap_mode(Pango.WrapMode.WORD_CHAR)
+            label.set_xalign(0)
+            content_box.pack_start(label, True, True, 0)
+            
+            # Add run buttons if any
+            for button in buttons:
+                content_box.pack_end(button, False, False, 0)
+            
+            message_box.add(content_box)
+        else:
+            # Regular user message
+            label = Gtk.Label(label=text)
+            label.set_line_wrap(True)
+            label.set_line_wrap_mode(Pango.WrapMode.WORD_CHAR)
+            label.set_xalign(0)
+            label.set_margin_start(12)
+            label.set_margin_end(12)
+            label.set_margin_top(8)
+            label.set_margin_bottom(8)
+            message_box.add(label)
         
-        message_box.add(label)
         align.add(message_box)
         self.messages_box.pack_start(align, False, False, 0)
         align.show_all()
