@@ -1,0 +1,9 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=DeepShell
+Comment=AI-powered Terminal Interface
+Exec=/usr/bin/deepshell
+Icon=/usr/share/deepshell/icon.png
+Categories=Development;Utility;
+Terminal=false 

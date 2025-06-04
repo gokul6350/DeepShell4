@@ -1,0 +1,8 @@
+#!/bin/sh
+set -e
+
+# Install Python dependencies
+pip3 install --user langchain-core>=0.1.27 langchain-google-genai>=0.0.11 langchain-groq>=0.0.6 google-ai-generativelanguage>=0.4.0 google-generativeai>=0.3.2 groq>=0.4.2
+
+# Update desktop database
+update-desktop-database || true 

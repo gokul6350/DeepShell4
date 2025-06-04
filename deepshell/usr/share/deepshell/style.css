@@ -1,9 +1,9 @@
 .deep-shell-window {
-    background-color: rgba(30, 30, 30, 0.9);
+    background-color: #1e1e1e;
 }
 
 .control-panel {
-    background-color: rgba(22, 22, 22, 0.95);
+    background-color: #252525;
     border-radius: 8px;
     padding: 8px;
 }
@@ -64,11 +64,11 @@ separator {
 }
 
 .messages-scroll {
-    background: transparent;
+    background-color: #1e1e1e;
 }
 
 .messages-container {
-    background: transparent;
+    background-color: transparent;
 }
 
 .message {
@@ -88,7 +88,7 @@ separator {
 }
 
 .input-container {
-    background: rgba(26, 27, 30, 0.95);
+    background: rgba(26, 27, 30, 0.98);
     border-top: 1px solid rgba(44, 46, 51, 0.95);
     padding: 8px;
 }
@@ -134,26 +134,22 @@ scrollbar slider:hover {
 }
 
 .panel-separator {
-    background-color: rgba(51, 51, 51, 0.95);
+    background-color: #333333;
     margin: 0 8px;
 }
 
 .terminal-widget {
-    background-color: rgba(30, 30, 30, 0.95);
+    background-color: rgba(0, 0, 0, 0.95);
     padding: 8px;
 }
 
 vte-terminal {
-    background: rgba(30, 30, 30, 0.95);
-    background-color: rgba(30, 30, 30, 0.95);
+    background: transparent;
+    background-color: transparent;
 }
 
 .terminal-panel {
-    background-color: rgba(30, 30, 30, 0.95);
-}
-
-.chat-panel {
-    background-color: rgba(30, 30, 30, 0.95);
+    background: transparent;
 }
 
 dialog {

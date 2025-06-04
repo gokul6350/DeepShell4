@@ -89,7 +89,6 @@ class DeepShellWindow(Gtk.Window):
         visual = screen.get_rgba_visual()
         if visual and screen.is_composited():
             self.set_visual(visual)
-            self.set_app_paintable(True)
         
         # Set up CSS provider
         css_provider = Gtk.CssProvider()
@@ -107,7 +106,6 @@ class DeepShellWindow(Gtk.Window):
         # Left panel for chat interface
         self.chat_panel = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
         self.chat_panel.set_size_request(600, -1)  # Set minimum width for chat panel
-        self.chat_panel.get_style_context().add_class("chat-panel")
         self.main_box.pack_start(self.chat_panel, True, True, 0)
         
         # Header bar (simplified)
@@ -219,22 +217,14 @@ class DeepShellWindow(Gtk.Window):
         self.terminal.set_cursor_shape(Vte.CursorShape.IBEAM)
         
         # Set terminal opacity
-        background_color = Gdk.RGBA()
-        background_color.parse('rgba(22,22,22,0.95)')
-        foreground_color = Gdk.RGBA()
-        foreground_color.parse('rgba(230,230,230,1.0)')
+        self.terminal.set_color_background(Gdk.RGBA(0.1, 0.1, 0.1, 0.95))  # 95% opacity
+        self.terminal.set_color_foreground(Gdk.RGBA(0.9, 0.9, 0.9, 1.0))
         
-        self.terminal.set_color_background(background_color)
-        self.terminal.set_color_foreground(foreground_color)
-        
-        # Disable transparency
-        self.terminal.set_clear_background(True)
+        # Enable transparency
+        self.terminal.set_clear_background(False)
         
         # Set terminal font
         self.terminal.set_font(Pango.FontDescription("MonoSpace 10"))
-        
-        # Add CSS class to terminal
-        self.terminal.get_style_context().add_class("vte-terminal")
         
         # Start shell in terminal
         self.terminal.spawn_sync(
