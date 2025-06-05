@@ -16,7 +16,7 @@ build/
 *.egg
 
 # DeepShell4 specific
-*.deb
+
 settings.json
 deepshell/
 
