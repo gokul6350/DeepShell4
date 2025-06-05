@@ -1,11 +1,40 @@
+# Python virtual environments
+venv/
 .venv/
+env/
+.env/
+
+# Python cache files
 __pycache__/
-*.pyc
-*.pyo
-*.pyd
-*.pyw
-*.pyz
-*.pywz
-*.pyzw
-*.pyzwz
+*.py[cod]
+*$py.class
+
+# Distribution / packaging
+dist/
+build/
+*.egg-info/
+*.egg
+
+# DeepShell4 specific
 *.deb
+settings.json
+deepshell/
+
+# IDE specific
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Logs and databases
+*.log
+*.sqlite
+*.db
+
+# Environment variables
+.env
+.env.*
+
+# OS specific
+.DS_Store
+Thumbs.db

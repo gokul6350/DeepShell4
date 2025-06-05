@@ -177,12 +177,19 @@ class DeepShellWindow(Gtk.Window):
             color: white;
             border: none;
             border-radius: 50%;
-            padding: 8px;
-            margin-left: 8px;
+            padding: 4px;
+            min-width: 28px;
+            min-height: 28px;
+            margin: 8px;
         }
         
         .send-button:hover {
             background-color: rgba(60, 100, 170, 0.95);
+        }
+        
+        .send-button image {
+            padding: 0;
+            margin: 0;
         }
         
         .command-block {
@@ -315,7 +322,7 @@ class DeepShellWindow(Gtk.Window):
         
         # Send button
         send_button = Gtk.Button()
-        send_icon = Gtk.Image.new_from_icon_name("send", Gtk.IconSize.BUTTON)
+        send_icon = Gtk.Image.new_from_icon_name("go-next", Gtk.IconSize.SMALL_TOOLBAR)
         send_button.add(send_icon)
         send_button.connect("clicked", self.on_entry_activate)
         send_button.get_style_context().add_class("send-button")

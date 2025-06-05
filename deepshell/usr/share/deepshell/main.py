@@ -7,6 +7,8 @@ import os
 import asyncio
 from LLMHandler import deepshellai, LLMHandler
 import json
+import re
+
 
 class SettingsDialog(Gtk.Dialog):
     def __init__(self, parent, current_settings):
@@ -66,7 +68,7 @@ class SettingsDialog(Gtk.Dialog):
 
 class DeepShellWindow(Gtk.Window):
     def __init__(self):
-        super().__init__(title="Deep Shell")
+        super().__init__(title="DeepShell AI - Your Terminal Copilot")
         
         # Initialize chat history
         self.chat_history = []
@@ -89,56 +91,178 @@ class DeepShellWindow(Gtk.Window):
         visual = screen.get_rgba_visual()
         if visual and screen.is_composited():
             self.set_visual(visual)
+            self.set_app_paintable(True)
         
         # Set up CSS provider
         css_provider = Gtk.CssProvider()
-        css_provider.load_from_path("style.css")
+        css_data = """
+        .deep-shell-window {
+            background-color: rgba(26, 27, 30, 0.95);
+            color: white;
+        }
+        
+        .header-box {
+            background-color: rgba(30, 30, 30, 0.95);
+            padding: 12px 16px;
+            border-bottom: 1px solid rgba(44, 46, 51, 0.95);
+        }
+        
+        .title-label {
+            color: white;
+            font-size: 18px;
+            font-weight: bold;
+        }
+        
+        .control-panel {
+            background-color: rgba(30, 30, 30, 0.95);
+            padding: 8px 16px;
+            border-bottom: 1px solid rgba(44, 46, 51, 0.95);
+        }
+        
+        .control-button {
+            background-color: rgba(51, 51, 51, 0.95);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            padding: 6px 12px;
+            margin: 0 4px;
+        }
+        
+        .control-button:hover {
+            background-color: rgba(76, 78, 83, 0.95);
+        }
+        
+        .messages-scroll {
+            background-color: rgba(26, 27, 30, 0.95);
+        }
+        
+        .message {
+            margin: 8px 16px;
+            padding: 12px 16px;
+            border-radius: 12px;
+            color: white;
+        }
+        
+        .message.user {
+            background-color: rgba(49, 49, 49, 0.95);
+            margin-left: 64px;
+        }
+        
+        .message.assistant {
+            background-color: rgba(35, 35, 35, 0.95);
+            margin-right: 64px;
+        }
+        
+        .input-container {
+            background-color: rgba(26, 27, 30, 0.95);
+            border-top: 1px solid rgba(44, 46, 51, 0.95);
+        }
+        
+        .message-input {
+            background-color: rgba(51, 51, 51, 0.95);
+            color: white;
+            border: 1px solid rgba(76, 78, 83, 0.95);
+            border-radius: 20px;
+            padding: 8px 12px;
+            margin: 8px;
+        }
+        
+        .message-input:focus {
+            background-color: rgba(64, 64, 64, 0.95);
+            border-color: rgba(100, 100, 100, 0.95);
+        }
+        
+        .send-button {
+            background-color: rgba(43, 87, 151, 0.95);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            padding: 4px;
+            min-width: 28px;
+            min-height: 28px;
+            margin: 8px;
+        }
+        
+        .send-button:hover {
+            background-color: rgba(60, 100, 170, 0.95);
+        }
+        
+        .send-button image {
+            padding: 0;
+            margin: 0;
+        }
+        
+        .command-block {
+            background-color: rgba(0, 0, 0, 0.4);
+            border-left: 3px solid rgba(43, 87, 151, 0.95);
+            border-radius: 4px;
+            padding: 8px 12px;
+            margin: 4px 0;
+            font-family: monospace;
+        }
+        
+        .run-button {
+            background-color: rgba(43, 87, 151, 0.95);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            padding: 4px;
+            min-width: 24px;
+            min-height: 24px;
+        }
+        
+        .run-button:hover {
+            background-color: rgba(60, 100, 170, 0.95);
+        }
+        
+        .terminal-panel {
+            background-color: rgba(30, 30, 30, 0.95);
+        }
+        
+        .chat-panel {
+            background-color: rgba(30, 30, 30, 0.95);
+        }
+        """
+        css_provider.load_from_data(css_data.encode())
         Gtk.StyleContext.add_provider_for_screen(
             screen,
             css_provider,
             Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION
         )
         
-        # Main horizontal container
-        self.main_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL)
-        self.add(self.main_box)
+        # Main paned container for resizable panels
+        self.main_paned = Gtk.Paned(orientation=Gtk.Orientation.HORIZONTAL)
+        self.add(self.main_paned)
         
         # Left panel for chat interface
         self.chat_panel = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
-        self.chat_panel.set_size_request(600, -1)  # Set minimum width for chat panel
-        self.main_box.pack_start(self.chat_panel, True, True, 0)
+        self.chat_panel.get_style_context().add_class("chat-panel")
+        self.main_paned.add1(self.chat_panel)
         
-        # Header bar (simplified)
-        self.header = Gtk.HeaderBar()
-        self.header.set_show_close_button(True)
-        self.header.props.title = "Deep Shell"
-        self.set_titlebar(self.header)
+        # Header bar with title, controls, and settings
+        header = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=8)
+        header.get_style_context().add_class("header-box")
         
-        # Logo in header
-        logo_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=8)
+        # Left side: Logo and title
+        left_header = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=8)
         logo_image = Gtk.Image.new_from_icon_name("utilities-terminal", Gtk.IconSize.LARGE_TOOLBAR)
-        logo_box.pack_start(logo_image, False, False, 0)
-        self.header.pack_start(logo_box)
+        title_label = Gtk.Label(label="DeepShell AI")
+        title_label.get_style_context().add_class("title-label")
         
-        # Control panel at the top of chat panel
-        control_panel = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=8)
-        control_panel.set_margin_start(16)
-        control_panel.set_margin_end(16)
-        control_panel.set_margin_top(8)
-        control_panel.set_margin_bottom(8)
-        control_panel.get_style_context().add_class("control-panel")
+        left_header.pack_start(logo_image, False, False, 0)
+        left_header.pack_start(title_label, False, False, 0)
         
-        # Auto Run switch with label
-        auto_run_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=4)
+        # Center: Auto Run control
+        center_header = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=8)
         auto_run_label = Gtk.Label(label="Auto Run")
-        auto_run_label.get_style_context().add_class("control-label")
+        auto_run_label.set_markup("<span color='white'>Auto Run</span>")
+        self.auto_run_switch = Gtk.CheckButton()
         
-        # Custom switch using checkbox
-        auto_run_switch = Gtk.CheckButton()
-        auto_run_switch.get_style_context().add_class("custom-switch")
+        center_header.pack_start(auto_run_label, False, False, 0)
+        center_header.pack_start(self.auto_run_switch, False, False, 0)
         
-        auto_run_box.pack_start(auto_run_label, False, False, 0)
-        auto_run_box.pack_start(auto_run_switch, False, False, 0)
+        # Right side: Settings and Reset buttons
+        right_header = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=8)
         
         # Reset button
         reset_button = Gtk.Button()
@@ -151,21 +275,23 @@ class DeepShellWindow(Gtk.Window):
         settings_button = Gtk.Button()
         settings_icon = Gtk.Image.new_from_icon_name("preferences-system", Gtk.IconSize.BUTTON)
         settings_button.add(settings_icon)
-        settings_button.set_tooltip_text("Settings")
         settings_button.get_style_context().add_class("control-button")
         settings_button.connect("clicked", self.on_settings_clicked)
         
-        # Pack controls in the control panel
-        control_panel.pack_start(auto_run_box, False, False, 0)
-        control_panel.pack_end(settings_button, False, False, 0)
-        control_panel.pack_end(reset_button, False, False, 0)
+        right_header.pack_end(settings_button, False, False, 0)
+        right_header.pack_end(reset_button, False, False, 0)
         
-        # Add control panel to chat panel
-        self.chat_panel.pack_start(control_panel, False, False, 0)
+        # Pack all sections into header
+        header.pack_start(left_header, False, False, 0)
+        header.set_center_widget(center_header)
+        header.pack_end(right_header, False, False, 0)
+        
+        self.chat_panel.pack_start(header, False, False, 0)
         
         # Messages ScrolledWindow
         scrolled = Gtk.ScrolledWindow()
         scrolled.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC)
+        scrolled.get_style_context().add_class("messages-scroll")
         self.chat_panel.pack_start(scrolled, True, True, 0)
         
         # Messages container
@@ -181,47 +307,47 @@ class DeepShellWindow(Gtk.Window):
         
         # Input area
         input_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=8)
-        input_box.set_margin_start(16)
-        input_box.set_margin_end(16)
-        input_box.set_margin_top(8)
-        input_box.set_margin_bottom(16)
-        self.chat_panel.pack_end(input_box, False, False, 0)
+        input_box.set_margin_start(8)
+        input_box.set_margin_end(8)
+        input_box.set_margin_top(0)
+        input_box.set_margin_bottom(0)
+        input_box.get_style_context().add_class("input-container")
         
         # Text input
         self.entry = Gtk.Entry()
         self.entry.set_placeholder_text("Ask me anything about the terminal...")
         self.entry.connect("activate", self.on_entry_activate)
+        self.entry.get_style_context().add_class("message-input")
         input_box.pack_start(self.entry, True, True, 0)
         
         # Send button
         send_button = Gtk.Button()
-        send_icon = Gtk.Image.new_from_icon_name("send", Gtk.IconSize.BUTTON)
+        send_icon = Gtk.Image.new_from_icon_name("go-next", Gtk.IconSize.SMALL_TOOLBAR)
         send_button.add(send_icon)
         send_button.connect("clicked", self.on_entry_activate)
         send_button.get_style_context().add_class("send-button")
         input_box.pack_end(send_button, False, False, 0)
         
-        # Separator between chat and terminal
-        separator = Gtk.Separator(orientation=Gtk.Orientation.VERTICAL)
-        separator.get_style_context().add_class("panel-separator")
-        self.main_box.pack_start(separator, False, False, 0)
+        self.chat_panel.pack_end(input_box, False, False, 0)
         
         # Right panel for terminal
         self.terminal_panel = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
-        self.terminal_panel.set_size_request(600, -1)  # Set minimum width for terminal panel
-        self.main_box.pack_start(self.terminal_panel, True, True, 0)
+        self.terminal_panel.get_style_context().add_class("terminal-panel")
+        self.main_paned.add2(self.terminal_panel)
         
         # Create terminal
         self.terminal = Vte.Terminal()
         self.terminal.set_cursor_blink_mode(Vte.CursorBlinkMode.ON)
         self.terminal.set_cursor_shape(Vte.CursorShape.IBEAM)
         
-        # Set terminal opacity
-        self.terminal.set_color_background(Gdk.RGBA(0.1, 0.1, 0.1, 0.95))  # 95% opacity
-        self.terminal.set_color_foreground(Gdk.RGBA(0.9, 0.9, 0.9, 1.0))
+        # Set terminal colors
+        background_color = Gdk.RGBA()
+        background_color.parse('rgba(30,30,30,0.95)')
+        foreground_color = Gdk.RGBA()
+        foreground_color.parse('rgba(230,230,230,1.0)')
         
-        # Enable transparency
-        self.terminal.set_clear_background(False)
+        self.terminal.set_color_background(background_color)
+        self.terminal.set_color_foreground(foreground_color)
         
         # Set terminal font
         self.terminal.set_font(Pango.FontDescription("MonoSpace 10"))
@@ -240,13 +366,8 @@ class DeepShellWindow(Gtk.Window):
         # Add terminal to panel
         self.terminal_panel.pack_start(self.terminal, True, True, 0)
         
-        # Set up styles
-        self.get_style_context().add_class("deep-shell-window")
-        scrolled.get_style_context().add_class("messages-scroll")
-        self.messages_box.get_style_context().add_class("messages-container")
-        input_box.get_style_context().add_class("input-container")
-        self.entry.get_style_context().add_class("message-input")
-        self.terminal.get_style_context().add_class("terminal-widget")
+        # Set initial position of the pane divider
+        self.main_paned.set_position(600)
         
     def load_settings(self):
         try:
@@ -296,7 +417,54 @@ class DeepShellWindow(Gtk.Window):
         except Exception as e:
             return f"Error: {str(e)}"
     
-    def add_message(self, text, message_type):
+    def extract_commands(self, text):
+        """Extract commands from text that are wrapped in ```run blocks"""
+        pattern = r"```run\n(.*?)```"
+        commands = re.findall(pattern, text, re.DOTALL)
+        return [cmd.strip() for cmd in commands]
+
+    def execute_command(self, command):
+        """Execute a command in the terminal"""
+        command_bytes = (command + "\n").encode('utf-8')
+        self.terminal.feed_child(command_bytes)
+
+    def create_run_button(self, command):
+        """Create a run button for a command"""
+        button = Gtk.Button()
+        button.set_tooltip_text("Run command")
+        icon = Gtk.Image.new_from_icon_name("media-playback-start", Gtk.IconSize.SMALL_TOOLBAR)
+        button.add(icon)
+        button.get_style_context().add_class("run-button")
+        button.connect("clicked", lambda btn: self.execute_command(command))
+        return button
+
+    def format_message_for_display(self, text_with_commands):
+        """
+        Processes text containing ```run...``` blocks for display.
+        Returns:
+            - processed_text: Text with ```run...``` blocks replaced by placeholders.
+            - command_details: A list of dicts, each with {"placeholder": str, "command_str": str}.
+        """
+        command_details = []
+        
+        def replacer_func(match_obj):
+            command_str = match_obj.group(1).strip()
+            placeholder_index = len(command_details) 
+            placeholder = f"__CMD_PLACEHOLDER_{placeholder_index}__"
+            
+            command_details.append({
+                "placeholder": placeholder,
+                "command_str": command_str
+            })
+            return placeholder
+
+        pattern = r"```run\n(.*?)```"
+        
+        processed_text = re.sub(pattern, replacer_func, text_with_commands, flags=re.DOTALL)
+        
+        return processed_text, command_details
+
+    def add_message(self, text_content, message_type):
         # Create a container for alignment
         align = Gtk.Alignment()
         if message_type == "user":
@@ -309,17 +477,78 @@ class DeepShellWindow(Gtk.Window):
         message_box.get_style_context().add_class("message")
         message_box.get_style_context().add_class(message_type)
         
-        # Label
-        label = Gtk.Label(label=text)
-        label.set_line_wrap(True)
-        label.set_line_wrap_mode(Pango.WrapMode.WORD_CHAR)
-        label.set_xalign(0)
-        label.set_margin_start(12)
-        label.set_margin_end(12)
-        label.set_margin_top(8)
-        label.set_margin_bottom(8)
+        if message_type == "assistant":
+            # text_content is the original LLM response.
+            # Auto-run has been handled by the caller (on_entry_activate).
+            
+            processed_text_for_display, command_details = self.format_message_for_display(text_content)
+            
+            # This container will hold all parts of the message (text labels, command blocks)
+            message_content_container = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=4)
+            message_content_container.set_margin_start(12)
+            message_content_container.set_margin_end(12)
+            message_content_container.set_margin_top(8)
+            message_content_container.set_margin_bottom(8)
+
+            if not command_details:
+                # No commands, just display the text as is (it might have Pango markup from LLM)
+                label = Gtk.Label()
+                label.set_markup(processed_text_for_display) # processed_text_for_display is original text
+                label.set_line_wrap(True)
+                label.set_line_wrap_mode(Pango.WrapMode.WORD_CHAR)
+                label.set_xalign(0)
+                message_content_container.pack_start(label, False, False, 0)
+            else:
+                # There are commands, so split the text by placeholders
+                placeholders_pattern = "|".join([re.escape(cd["placeholder"]) for cd in command_details])
+                # The pattern includes capturing parentheses to keep delimiters
+                text_parts = re.split(f"({placeholders_pattern})", processed_text_for_display)
+
+                # Helper to map placeholders back to their command strings
+                placeholder_to_cmd_map = {cd["placeholder"]: cd["command_str"] for cd in command_details}
+
+                for part in filter(None, text_parts): # filter(None,...) removes empty strings if any
+                    if part in placeholder_to_cmd_map:
+                        # This part is a placeholder, so render a command block
+                        cmd_str = placeholder_to_cmd_map[part]
+                        
+                        cmd_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=6)
+                        cmd_box.get_style_context().add_class("command-block") # Apply CSS
+
+                        cmd_label = Gtk.Label()
+                        # Format command with a '$' prefix and monospace font using Pango
+                        cmd_label.set_markup(f'<span font_family="monospace" weight="bold">$ {cmd_str}</span>')
+                        cmd_label.set_xalign(0)
+                        cmd_box.pack_start(cmd_label, True, True, 0)
+
+                        if not self.auto_run_switch.get_active():
+                            # Add run button only if auto-run is off
+                            button_widget = self.create_run_button(cmd_str)
+                            cmd_box.pack_end(button_widget, False, False, 0)
+                        
+                        message_content_container.pack_start(cmd_box, False, False, 0)
+                    else:
+                        # This part is regular text
+                        if part.strip(): # Avoid adding empty labels
+                            label = Gtk.Label()
+                            label.set_markup(part) # Use set_markup for any Pango in text segments
+                            label.set_line_wrap(True)
+                            label.set_line_wrap_mode(Pango.WrapMode.WORD_CHAR)
+                            label.set_xalign(0)
+                            message_content_container.pack_start(label, False, False, 0)
+            
+            message_box.add(message_content_container)
+        else: # User message
+            label = Gtk.Label(label=text_content)
+            label.set_line_wrap(True)
+            label.set_line_wrap_mode(Pango.WrapMode.WORD_CHAR)
+            label.set_xalign(0)
+            label.set_margin_start(12)
+            label.set_margin_end(12)
+            label.set_margin_top(8)
+            label.set_margin_bottom(8)
+            message_box.add(label)
         
-        message_box.add(label)
         align.add(message_box)
         self.messages_box.pack_start(align, False, False, 0)
         align.show_all()
@@ -334,21 +563,46 @@ class DeepShellWindow(Gtk.Window):
         self.add_message(text, "user")
     
     def add_assistant_message(self, text):
+        # This is now just a wrapper, auto-run is handled by the caller
         self.add_message(text, "assistant")
     
     def on_entry_activate(self, widget):
         text = self.entry.get_text().strip()
-        if text:
-            self.add_user_message(text)
-            self.entry.set_text("")
+        if not text:
+            return # Do nothing if input is empty
             
-            # Create async task for AI response
-            async def get_response():
-                response = await self.get_ai_response(text)
-                GLib.idle_add(self.add_assistant_message, response)
+        self.add_user_message(text)
+        self.entry.set_text("")
+        
+        # Create async task for AI response and processing
+        async def get_response_and_process():
+            try:
+                llm_response_text = await self.get_ai_response(text) # Original LLM response
+
+                # This function will be called by GLib.idle_add, so it runs in the main GTK thread
+                def do_gui_update_after_ai():
+                    # Handle auto-run based on the original LLM response
+                    if self.auto_run_switch.get_active():
+                        commands_in_response = self.extract_commands(llm_response_text)
+                        for cmd_to_run in commands_in_response:
+                            self.execute_command(cmd_to_run)
+                    
+                    # Add assistant message to UI (it will be formatted for display by add_message)
+                    self.add_assistant_message(llm_response_text)
+                
+                GLib.idle_add(do_gui_update_after_ai)
             
-            # Run async task
-            asyncio.run(get_response())
+            except Exception as e:
+                # Handle/display error if get_ai_response fails
+                error_message = f"Error processing AI request: {str(e)}"
+                GLib.idle_add(self.add_assistant_message, error_message)
+        
+        # Run the async task.
+        # For Gtk, it's often better to run asyncio tasks in a way that integrates with GLib's main loop
+        # or in a separate thread to avoid blocking. asyncio.run() can block.
+        # However, if this was working before, we'll keep it for now to focus on display.
+        # A more robust Gtk+asyncio integration might be needed for complex apps.
+        asyncio.run(get_response_and_process())
 
 def main():
     win = DeepShellWindow()

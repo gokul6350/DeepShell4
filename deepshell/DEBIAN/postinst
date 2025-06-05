@@ -1,8 +1,26 @@
 #!/bin/sh
 set -e
 
-# Install Python dependencies
-pip3 install --user langchain-core>=0.1.27 langchain-google-genai>=0.0.11 langchain-groq>=0.0.6 google-ai-generativelanguage>=0.4.0 google-generativeai>=0.3.2 groq>=0.4.2
+# Install Python dependencies system-wide
+pip3 install --break-system-packages \
+    langchain-core>=0.1.27 \
+    langchain-google-genai>=0.0.11 \
+    langchain-groq>=0.0.6 \
+    google-ai-generativelanguage>=0.4.0 \
+    google-generativeai>=0.3.2 \
+    groq>=0.4.2 \
+    requests \
+    PyYAML \
+    rich \
+    tqdm
+
+# Make the application executable
+chmod +x /usr/bin/deepshell
 
 # Update desktop database
-update-desktop-database || true 
+update-desktop-database || true
+
+# Update icon cache if icon exists
+if [ -f /usr/share/deepshell/icon.png ]; then
+    update-icon-caches /usr/share/deepshell/icon.png || true
+fi 

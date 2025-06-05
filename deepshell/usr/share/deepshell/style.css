@@ -1,9 +1,9 @@
 .deep-shell-window {
-    background-color: #1e1e1e;
+    background-color: rgba(30, 30, 30, 0.9);
 }
 
 .control-panel {
-    background-color: #252525;
+    background-color: rgba(30, 30, 30, 0.95);
     border-radius: 8px;
     padding: 8px;
 }
@@ -64,11 +64,11 @@ separator {
 }
 
 .messages-scroll {
-    background-color: #1e1e1e;
+    background: transparent;
 }
 
 .messages-container {
-    background-color: transparent;
+    background: transparent;
 }
 
 .message {
@@ -78,7 +78,7 @@ separator {
 }
 
 .message.user {
-    background-color: #2b5797;
+    background-color: #313131;
     color: white;
 }
 
@@ -88,7 +88,7 @@ separator {
 }
 
 .input-container {
-    background: rgba(26, 27, 30, 0.98);
+    background: rgba(26, 27, 30, 0.95);
     border-top: 1px solid rgba(44, 46, 51, 0.95);
     padding: 8px;
 }
@@ -134,22 +134,26 @@ scrollbar slider:hover {
 }
 
 .panel-separator {
-    background-color: #333333;
+    background-color: rgba(51, 51, 51, 0.95);
     margin: 0 8px;
 }
 
 .terminal-widget {
-    background-color: rgba(0, 0, 0, 0.95);
+    background-color: rgba(30, 30, 30, 0.95);
     padding: 8px;
 }
 
 vte-terminal {
-    background: transparent;
-    background-color: transparent;
+    background: rgba(30, 30, 30, 0.95);
+    background-color: rgba(30, 30, 30, 0.95);
 }
 
 .terminal-panel {
-    background: transparent;
+    background-color: rgba(30, 30, 30, 0.95);
+}
+
+.chat-panel {
+    background-color: rgba(30, 30, 30, 0.95);
 }
 
 dialog {
@@ -189,4 +193,35 @@ dialog button {
 
 dialog button:hover {
     background-color: #3b67a7;
+}
+
+.run-button {
+    background-color: #2b5797;
+    color: white;
+    border-radius: 50%;
+    padding: 4px;
+    min-width: 28px;
+    min-height: 28px;
+    margin-left: 8px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+.run-button:hover {
+    background-color: #3b67a7;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+}
+
+.run-button image {
+    color: white;
+    padding: 0;
+    margin: 0;
+}
+
+.command-block {
+    background-color: rgba(0, 0, 0, 0.2);
+    border-radius: 4px;
+    padding: 8px 12px;
+    margin: 4px 0;
+    font-family: monospace;
+    border-left: 3px solid #2b5797;
 } 

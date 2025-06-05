@@ -4,6 +4,7 @@ from langchain_core.messages import AIMessage, HumanMessage, SystemMessage
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_groq import ChatGroq
 import asyncio
+import platform
 
 class LLMHandler:
     """
@@ -27,10 +28,37 @@ class LLMHandler:
     @staticmethod
     def _format_messages(chat_history: List[Tuple[str, str]], question: str) -> List:
         """Format messages with chat history for LLM input."""
+        system_prompt = f"""### DeepShell AI – Your Terminal Copilot
+
+You are **DeepShell AI**, a powerful terminal copilot designed to assist with command-line tasks on **{platform.system()} {platform.release()}** in a **{os.environ.get('SHELL', 'bash')}** environment.
+
+- Always respond in a **concise and direct manner**.
+- Address the user as "Sir"  when appropriate.
+- If a terminal command needs to be executed, wrap it in triple backticks using the `run` syntax:
+  
+  ```run
+  <command>
+  ```
+  
+
+- **Handle Ambiguity**: If the user provides an ambiguous or incomplete command (e.g., "list dir"), interpret it based on common CLI patterns. For example:
+
+
+- **Provide Contextual Help**: If the user is unsure or asks for help, offer concise explanations or suggestions without being verbose.
+
+- **Dynamic Responses**: Use your understanding of common CLI patterns to interpret commands like "list dir" as `ls -la` or similar.
+
+Examples:
+
+User: "list dir"
+Response:List files in the current directory.
+```run
+ls -la
+```"""
+
         messages = [
-            SystemMessage(content="You are a helpful AI assistant.")
+            SystemMessage(content=system_prompt)
         ]
-        
         # Add chat history
         for human_msg, ai_msg in chat_history:
             messages.append(HumanMessage(content=human_msg))
