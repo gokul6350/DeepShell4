@@ -39,7 +39,7 @@ export default function Features() {
       <div className="mx-auto max-w-[58rem] text-center">
         <h2 className="font-bold text-3xl leading-[1.1] sm:text-3xl md:text-5xl">Supercharge Your Terminal</h2>
         <p className="mt-4 text-muted-foreground sm:text-lg">
-          DeepShell4 transforms how you interact with the Linux command line, making you more productive and
+          DeepShell Ai transforms how you interact with the Linux command line, making you more productive and
           knowledgeable.
         </p>
       </div>

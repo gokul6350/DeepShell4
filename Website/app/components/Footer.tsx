@@ -6,7 +6,7 @@ export default function Footer() {
     <footer className="border-t border-border/40">
       <div className="container flex flex-col gap-8 py-8 md:flex-row md:py-12">
         <div className="flex-1 space-y-4">
-          <h2 className="font-bold text-green-500">DeepShell4</h2>
+          <h2 className="font-bold text-green-500">DeepShell AI</h2>
           <p className="text-sm text-muted-foreground">Your AI-powered terminal copilot for Linux systems.</p>
         </div>
         <div className="grid flex-1 grid-cols-2 gap-12 sm:grid-cols-3">

@@ -10,11 +10,11 @@ export default function CTA() {
           Ready to transform your terminal experience?
         </h2>
         <p className="max-w-[42rem] leading-normal text-muted-foreground sm:text-xl sm:leading-8">
-          Join thousands of developers who have enhanced their Linux command line productivity with DeepShell4.
+          Join thousands of developers who have enhanced their Linux command line productivity with DeepShell AI.
         </p>
         <div className="flex flex-col sm:flex-row gap-4 mt-8">
           <Button size="lg" className="bg-green-600 hover:bg-green-700">
-            Download DeepShell4
+            Download DeepShell AI
           </Button>
           <Button variant="outline" size="lg">
             Star on GitHub

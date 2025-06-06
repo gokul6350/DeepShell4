@@ -3,7 +3,7 @@ import { Copy } from "lucide-react"
 
 export default function Installation() {
   return (
-    <section id="installation" className="bg-black/30 py-24">
+    <div id="installation" className="bg-black/30 py-24">
       <div className="container">
         <div className="mx-auto max-w-[58rem] text-center mb-12">
           <h2 className="font-bold text-3xl leading-[1.1] sm:text-3xl md:text-5xl">Easy Installation</h2>
@@ -20,9 +20,8 @@ export default function Installation() {
           <pre className="font-mono text-green-500 p-4 overflow-x-auto">
             <code>
               # Install DeepShell4{"\n"}
-              git clone https://github.com/gokul6350/DeepShell4.git{"\n"}
-              cd DeepShell4{"\n"}
-              ./install.sh{"\n\n"}# Launch DeepShell4{"\n"}
+              wget https://github.com/gokul6350/DeepShell4/blob/main/deepshell.deb{"\n"}
+              sudo dpkg -i deepshell.deb{"\n\n"}# Launch DeepShell4{"\n"}
               deepshell
             </code>
           </pre>
@@ -34,6 +33,6 @@ export default function Installation() {
           </Button>
         </div>
       </div>
-    </section>
+    </div>
   )
 }

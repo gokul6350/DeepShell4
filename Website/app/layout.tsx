@@ -7,7 +7,7 @@ import MouseMoveEffect from "@/components/mouse-move-effect"
 const jetbrainsMono = JetBrains_Mono({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
-  title: "DeepShell4 - Your Terminal Copilot for Linux Systems",
+  title: "DeepShell - Your Terminal Copilot for Linux Systems",
   description:
     "An intelligent terminal interface that combines the power of multiple AI models with a modern Linux terminal experience.",
     generator: 'v0.dev'
