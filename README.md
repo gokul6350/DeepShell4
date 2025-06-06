@@ -2,6 +2,11 @@
 
 DeepShell4 is an intelligent terminal interface that combines the power of multiple AI models with a modern Linux terminal experience. It serves as your AI-powered copilot, helping you navigate, learn, and master the Linux command line.
 
+[![GitHub Stars](https://img.shields.io/github/stars/gokul6350/DeepShell4?style=social)](https://github.com/gokul6350/DeepShell4)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Snap Status](https://build.snapcraft.io/badge/gokul6350/DeepShell4.svg)](https://build.snapcraft.io/user/gokul6350/DeepShell4)
+<a href="https://www.producthunt.com/products/deep-shell?embed=true&utm_source=badge-featured&utm_medium=badge&utm_source=badge-deep&#0045;shell" target="_blank"><img src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=974723&theme=light&t=1749194143240" alt="Deep&#0032;Shell&#0032; - Your&#0032;AI&#0032;terminal&#0032;Copilot | Product Hunt" style="width: 250px; height: 54px;" width="250" height="54" /></a>
+
 ## Preview
 
 ![DeepShell4 Interface](preview/preview1.png)
@@ -65,10 +70,27 @@ sudo apt-get install python3-gi python3-gi-cairo gir1.2-gtk-3.0 gir1.2-vte-2.91
 
 ## Installation Options
 
+### Using Snap (Recommended)
+The easiest way to install DeepShell4:
+```bash
+sudo snap install deepshell
+```
+
+### Using Debian Package
+You can download the latest .deb package from our [GitHub releases](https://github.com/gokul6350/DeepShell4/releases) page or build it yourself:
+
+```bash
+# Build the package
+dpkg-deb --build deepshell
+
+# Install the package
+sudo dpkg -i deepshell.deb
+```
+
 ### From Source
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/DeepShell4.git
+git clone https://github.com/gokul6350/DeepShell4.git
 cd DeepShell4
 
 # Create and activate virtual environment
@@ -80,15 +102,6 @@ pip install -r requirements.txt
 
 # Run the application
 python main.py
-```
-
-### Using Debian Package
-```bash
-# Build the package
-dpkg-deb --build deepshell
-
-# Install the package
-sudo dpkg -i deepshell.deb
 ```
 
 ## API Keys Setup
@@ -118,7 +131,7 @@ Store your API keys securely and never share them or commit them to version cont
 ## Contributing
 
 Contributions are welcome! Feel free to:
-- Report bugs
+- Report bugs through [GitHub Issues](https://github.com/gokul6350/DeepShell4/issues)
 - Suggest new features
 - Submit pull requests
 - Improve documentation

@@ -1,9 +1,12 @@
 [Desktop Entry]
+Version=1.0
 Name=DeepShell AI
+GenericName=Terminal Copilot
 Comment=AI-powered Terminal Interface
 Exec=/usr/bin/deepshell
 Icon=/usr/share/deepshell/icon.png
 Terminal=false
 Type=Application
 Categories=Development;System;TerminalEmulator;
-Keywords=Terminal;AI;Shell; 
+Keywords=Terminal;AI;Shell;
+StartupWMClass=DeepShell4 

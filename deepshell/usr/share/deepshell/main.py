@@ -69,7 +69,7 @@ class SettingsDialog(Gtk.Dialog):
 class DeepShellWindow(Gtk.Window):
     def __init__(self):
         super().__init__(title="DeepShell AI - Your Terminal Copilot")
-        
+        self.set_wmclass("DeepShell4", "DeepShell4")
         # Initialize chat history
         self.chat_history = []
         

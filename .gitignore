@@ -16,7 +16,6 @@ build/
 *.egg
 
 # DeepShell4 specific
-
 settings.json
 deepshell/
 
@@ -38,3 +37,17 @@ deepshell/
 # OS specific
 .DS_Store
 Thumbs.db
+
+# Temporary files
+*.tmp
+*.temp
+*.bak
+*~
+
+# Coverage reports
+coverage/
+.coverage
+htmlcov/
+
+# Local development
+*.local
