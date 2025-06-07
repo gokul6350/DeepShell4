@@ -7,7 +7,7 @@ DeepShell4 is an intelligent terminal interface that combines the power of multi
 [![Snap Status](https://build.snapcraft.io/badge/gokul6350/DeepShell4.svg)](https://build.snapcraft.io/user/gokul6350/DeepShell4)
 <a href="https://www.producthunt.com/products/deep-shell?embed=true&utm_source=badge-featured&utm_medium=badge&utm_source=badge-deep&#0045;shell" target="_blank"><img src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=974723&theme=light&t=1749194143240" alt="Deep&#0032;Shell&#0032; - Your&#0032;AI&#0032;terminal&#0032;Copilot | Product Hunt" style="width: 250px; height: 54px;" width="250" height="54" /></a>
 
-## Preview
+## Preview 
 
 ![DeepShell4 Interface](preview/preview1.png)
 
