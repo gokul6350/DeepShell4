@@ -18,7 +18,7 @@ pip3 install --break-system-packages \
 chmod +x /usr/bin/deepshell
 
 # Update desktop database
-update-desktop-database || true
+update-desktop-database || true 
 
 # Update icon cache if icon exists
 if [ -f /usr/share/deepshell/icon.png ]; then

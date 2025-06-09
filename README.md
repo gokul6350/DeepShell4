@@ -4,7 +4,7 @@ DeepShell4 is an intelligent terminal interface that combines the power of multi
 
 [![GitHub Stars](https://img.shields.io/github/stars/gokul6350/DeepShell4?style=social)](https://github.com/gokul6350/DeepShell4)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Snap Status](https://build.snapcraft.io/badge/gokul6350/DeepShell4.svg)](https://build.snapcraft.io/user/gokul6350/DeepShell4)
+[![Get it from the Snap Store](https://snapcraft.io/static/images/badges/en/snap-store-black.svg)](https://snapcraft.io/deepshell)
 <a href="https://www.producthunt.com/products/deep-shell?embed=true&utm_source=badge-featured&utm_medium=badge&utm_source=badge-deep&#0045;shell" target="_blank"><img src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=974723&theme=light&t=1749194143240" alt="Deep&#0032;Shell&#0032; - Your&#0032;AI&#0032;terminal&#0032;Copilot | Product Hunt" style="width: 250px; height: 54px;" width="250" height="54" /></a>
 
 ## Preview
@@ -138,4 +138,4 @@ Contributions are welcome! Feel free to:
 
 ## License
 
-MIT License - Feel free to use and modify as needed. 
+MIT License - Feel free to use and modify as needed.
